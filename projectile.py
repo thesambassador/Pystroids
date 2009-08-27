@@ -32,5 +32,6 @@ class Projectile():
 			self.color.g -= 28
 			self.color.b -= 28
 			pass
-		screen.set_at((self.pos.x, self.pos.y), int(self.color))
+		
+		screen.set_at((int(self.pos.x), int(self.pos.y)), self.color)
 		self.life -= 1

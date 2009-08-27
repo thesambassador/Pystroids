@@ -63,6 +63,13 @@ def explosion(start, num, list):
 	for i in range (0, num):
 		list.append(Projectile(start, random.uniform(0,360), randomVector((-3, 3), (-3, 3)), 1, 30))
 	
+def round(fp):
+	dec = fp
+	dec -= int(dec)
+	if dec >= .5:
+		return int(fp+(1.0-dec))
+	else:
+		return int(int(fp))
 	
 	
 	

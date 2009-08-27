@@ -51,9 +51,8 @@ class Asteroid(movingObject):
 			points = 20
 			
 		elif self.radius == 40:
-			newPos1.setMag(newPos1.length()-40)
-			newPos2.setMag(newPos1.length()-40)
-			print newPos1.length()
+			newPos1.setMag(newPos1.length()-20)
+			newPos2.setMag(newPos2.length()-20)
 			offset = Vector(random.uniform(-.3, .3), random.uniform(-.3, .3))
 			self.objs.add(Asteroid(self.screen, self.imgList, 20, self.player, self.objs, newPos1, self.v+offset))
 			offset = Vector(random.uniform(-.3, .3), random.uniform(-.3, .3))
@@ -65,6 +64,6 @@ class Asteroid(movingObject):
 			points = 100
 		
 		dict = {'points': points}
-		postPoints = pygame.event.Event(200, dict)
+		postPoints = pygame.event.Event(pygame.USEREVENT+2, dict)
 		pygame.event.post(postPoints)
 		

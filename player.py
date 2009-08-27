@@ -27,11 +27,13 @@ class Player(movingObject):
 		self.alive = 1
 		self.screen = screen
 		self.thrust = 1
-		self.rotSpeed = 5
+		self.rotSpeed = 7
 		self.keyUp = 0
 		self.frame = 0
 		self.projs = projectiles
 		self.respawnTime = 100
+		self.keyLeft = 0
+		self.keyRight = 0
 		
 	def keyEvent(self, event):
 		if self.alive:
@@ -39,9 +41,9 @@ class Player(movingObject):
 				if event.key == pygame.K_UP:
 					self.keyUp = 1
 				elif event.key == pygame.K_LEFT:
-					self.angV += self.rotSpeed
+					self.keyLeft = self.rotSpeed
 				elif event.key == pygame.K_RIGHT:
-					self.angV -= self.rotSpeed
+					self.keyRight = -self.rotSpeed
 				elif event.key == pygame.K_SPACE:
 					shipTip = create(self.rot, 22)
 					shipTip.y *= -1
@@ -53,9 +55,9 @@ class Player(movingObject):
 				if event.key == pygame.K_UP:
 					self.keyUp = 0
 				if event.key == pygame.K_LEFT:
-					self.angV -= self.rotSpeed
+					self.keyLeft = 0
 				if event.key == pygame.K_RIGHT:
-					self.angV += self.rotSpeed
+					self.keyRight = 0
 		
 	def update(self, ticks, screen, objs):
 		if self.alive:
@@ -70,6 +72,8 @@ class Player(movingObject):
 			else:
 				self.f = Vector()
 				self.image = self.origImage
+			
+			self.angV = self.keyRight + self.keyLeft
 		else:
 			if self.respawnTime > 0:
 				self.respawnTime -= 1
@@ -78,7 +82,6 @@ class Player(movingObject):
 					if dist(obj.pos, self.pos) < obj.radius + self.radius:
 						break
 				else:
-					print "RESPAWNED"
 					self.alive = 1
 					self.respawnTime = 100
 					
@@ -97,7 +100,7 @@ class Player(movingObject):
 			self.image.fill((0,0,0,0))
 			self.alive = 0
 			
-			dead = pygame.event.Event(201, {})
+			dead = pygame.event.Event(pygame.USEREVENT+3, pos = self.pos)
 			pygame.event.post(dead)
 			
 		
