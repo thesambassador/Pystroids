@@ -1,10 +1,13 @@
 import pygame
 import time
+from text import Text
 from movingObject import movingObject
 from player import Player
 from vector import *
 from asteroid import Asteroid
+from constants import *
 from miscFunctions import *
+from highscore import *
 
 pygame.init()
 
@@ -17,9 +20,7 @@ lives = 3
 extraLives = 1
 scene = 0
 name = ""
-highScoreName = ""
-highScore = 0
-
+highScores = HighScoreTable()
 
 #gui stuff
 pygame.font.init()
@@ -53,6 +54,7 @@ player = Player(screen, projs)
 for i in range(0, 6):
 	objs.add(Asteroid(screen, asteroidImgs, 70, player, objs))
 
+#ZOMG GAME LOOP
 while running:
 	
 	ticks = clock.tick(50)
@@ -63,20 +65,15 @@ while running:
 		screen.fill((0,0,0))
 		objs.update(ticks, screen)
 		
-		#probably should write a class for this... Writes a few text lines to different places/sizes
-		#wanted to condense writing multiple centered texts at multiple sizes and location.  UGLY!
+		#I don't know a better way to handle basic texts... this class kinda sucks. 
 		texts = []
-		texts.append((pygame.font.Font(pygame.font.get_default_font(), 50), .75,"PYSTROIDS"))
-		texts.append((pygame.font.Font(pygame.font.get_default_font(), 20), 1, "Press Space to Start"))
-		texts.append((pygame.font.Font(pygame.font.get_default_font(), 15), 1.75, "High Score: " + highScoreName + " " + str(highScore)))
+		
+		texts.append(Text(screen, CENTER, (255,255,255,255), 50, "PYSTROIDS", .75*screen.get_height()/2))
+		texts.append(Text(screen, CENTER, (255,255,255,255), 20, "Press Space to Start", screen.get_height()/2))
+	
 		
 		for t in texts:
-			font = t[0]
-			mult = t[1]
-			text = t[2]
-			posX = screen.get_width()/2 - font.size(text)[0]/2
-			posY = screen.get_height()/2*mult * .75 - font.size(text)[1]/2
-			screen.blit(font.render(text, 0, (255,255,255,255)), (posX, posY))
+			t.update()
 		
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
@@ -85,15 +82,17 @@ while running:
 				if event.key == pygame.K_SPACE:
 					objs = pygame.sprite.Group([])
 					font = pygame.font.Font(pygame.font.get_default_font(), 25)
-					score = 0
+					points = 0
 					lives = 1
 					extraLives = 1
 					scene = 1
 					projs = []
 					explosions = []
 					player = Player(screen, projs)
+				elif event.key == pygame.K_h:
+					scene = 3
 					
-					
+	
 	#Game scene
 	elif scene == 1:
 		#Game Events
@@ -106,16 +105,16 @@ while running:
 				elif event.key == pygame.K_ESCAPE:
 					running = 0
 			#next level
-			elif event.type == pygame.USEREVENT+1:
+			elif event.type == LEVELUP:
 				level += 1
 				for i in range(0, level+2):
 					objs.add(Asteroid(screen, asteroidImgs, 70, player, objs))
 			#points
-			elif event.type == pygame.USEREVENT+2:
+			elif event.type == POINTS:
 				points += event.points
 				
 			#player dies
-			elif event.type == pygame.USEREVENT+3:
+			elif event.type == PLAYERDEAD:
 				lives -= 1
 				
 		#update objects
@@ -166,6 +165,8 @@ while running:
 		if lives == 0:
 			name = ""
 			scene = 2
+			
+	
 	#Game Over scene
 	elif scene == 2:
 		screen.fill((0,0,0))
@@ -174,37 +175,62 @@ while running:
 		#probably should write a class for this... Writes a few text lines to different places/sizes
 		#wanted to condense writing multiple centered texts at multiple sizes and location.  UGLY!
 		texts = []
-		texts.append((pygame.font.Font(pygame.font.get_default_font(), 50), .75,"GAME OVER"))
-		texts.append((pygame.font.Font(pygame.font.get_default_font(), 20), 1,"Enter your Name"))
-		texts.append((pygame.font.Font(pygame.font.get_default_font(), 15), 1.25,name))
-		texts.append((pygame.font.Font(pygame.font.get_default_font(), 20), 1.5,"Score: "+str(score)))
+		
+		texts.append(Text(screen, CENTER, (255,255,255,255), 50, "GAME OVER", .75*screen.get_height()/2))
+		texts.append(Text(screen, CENTER, (255,255,255,255), 20, "Enter your Name", screen.get_height()/2))
+		texts.append(Text(screen, CENTER, (255,255,255,255), 15, name, 1.25*screen.get_height()/2))
+		texts.append(Text(screen, CENTER, (255,255,255,255), 20, "Score: "+str(points), 1.5*screen.get_height()/2))
 		
 		for t in texts:
-			font = t[0]
-			mult = t[1]
-			text = t[2]
-			posX = screen.get_width()/2 - font.size(text)[0]/2
-			posY = screen.get_height()/2*mult * .75 - font.size(text)[1]/2
-			screen.blit(font.render(text, 0, (255,255,255,255)), (posX, posY))
+			t.update()
 		
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				running = 0
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_RETURN:
-					highScore = score
-					highScoreName = name
+					highScores.addScore(HighScore(points, name))
+					print highScores
 					scene = 0
 				elif event.key == pygame.K_BACKSPACE and len(name) > 0:
 					name = name[0:-1]
 				elif event.key < 123 and event.key >= 97:
-					name += pygame.key.name(event.key)
+					name += pygame.key.name(event.key).upper()
+	
+	#High Scores scene
+	elif scene == 3:
+		screen.fill((0,0,0))
+		objs.update(ticks, screen)
+		
+		#I don't know a better way to handle basic texts... this class kinda sucks. 
+		texts = []
+		
+		texts.append(Text(screen, CENTER, (255,255,255,255), 40, "High Scores", 20))
+		texts.append(Text(screen, CENTER, (255,255,255,255), 20, "Press Space to Return to the Menu", screen.get_height() - 50))
+		
+		
+		i = 1
+		for score in highScores.scores:
+			num = 25
+			text = str(i)+". "+score.name
+			num -= len(text)
+			for x in range(0, num-len(str(score.score))):
+				text += " "
+			text += str(score.score)
+			texts.append(Text(screen, CENTER, (255,255,255,255), 20, text, 100+25*i))
+			i += 1
+		for t in texts:
+			t.update()
+		
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				running = 0
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_SPACE:
+					scene = 0
+	
+	
 	pygame.display.flip()
-	
-	
-	
-	
-	
 	
 	
 	

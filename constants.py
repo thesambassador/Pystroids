@@ -1,0 +1,9 @@
+import pygame
+
+LEFT = 0
+CENTER = 1
+RIGHT = 2
+
+LEVELUP = pygame.USEREVENT+1
+POINTS = pygame.USEREVENT+2
+PLAYERDEAD = pygame.USEREVENT+3
