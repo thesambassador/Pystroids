@@ -1,5 +1,6 @@
 import pygame
 import time
+import cPickle
 from text import Text
 from movingObject import movingObject
 from player import Player
@@ -21,6 +22,14 @@ extraLives = 1
 scene = 0
 name = ""
 highScores = HighScoreTable()
+
+try:
+	hsfile = open("highScores.dat")
+	unpickler = cPickle.Unpickler(hsfile)
+	highScores = unpickler.load()
+except:
+	print "bla"
+	highScores = HighScoreTable()
 
 #gui stuff
 pygame.font.init()
@@ -84,6 +93,7 @@ while running:
 					font = pygame.font.Font(pygame.font.get_default_font(), 25)
 					points = 0
 					lives = 1
+					level = 1
 					extraLives = 1
 					scene = 1
 					projs = []
@@ -204,21 +214,35 @@ while running:
 		
 		#I don't know a better way to handle basic texts... this class kinda sucks. 
 		texts = []
-		
 		texts.append(Text(screen, CENTER, (255,255,255,255), 40, "High Scores", 20))
 		texts.append(Text(screen, CENTER, (255,255,255,255), 20, "Press Space to Return to the Menu", screen.get_height() - 50))
 		
+		for i in range(1, 11):
+			num = Text(screen)
+			num.setWords(str(i)+".")
+			num.setX(100 - num.font.size(num.words)[0])
+			num.setyPos(100+25*i)
+			texts.append(num)
 		
 		i = 1
 		for score in highScores.scores:
-			num = 25
-			text = str(i)+". "+score.name
-			num -= len(text)
-			for x in range(0, num-len(str(score.score))):
-				text += " "
-			text += str(score.score)
-			texts.append(Text(screen, CENTER, (255,255,255,255), 20, text, 100+25*i))
-			i += 1
+			name = Text(screen)
+			points = Text(screen)
+			
+			name.setWords(score.name)
+			name.setX(150 - name.font.size(num.words)[0])
+			name.setyPos(100+25*i)
+			
+			points.setWords(str(score.score))
+			points.setAlignment(RIGHT)
+			points.setX(-100)
+			points.setyPos(100+25*i)
+			
+			texts.append(points)
+			texts.append(name)
+			i+= 1
+			
+		
 		for t in texts:
 			t.update()
 		

@@ -11,6 +11,7 @@ class Text():
 		self.color = color
 		self.words = words
 		self.yPos = yPos
+		self.xStart = 0
 		
 	def setSize(self, size):
 		self.font = pygame.font.Font(pygame.font.get_default_font(), size)
@@ -27,6 +28,9 @@ class Text():
 	def setyPos(self, yPos):
 		self.yPos = yPos
 	
+	def setX(self, x):
+		self.xStart = x
+	
 	def update(self):
-		xPos = (self.screen.get_width())/2.0*self.align - (self.align*.5*self.font.size(self.words)[0])
+		xPos = (self.screen.get_width())/2.0*self.align - (self.align*.5*self.font.size(self.words)[0])+self.xStart
 		self.screen.blit(self.font.render(self.words, 0, self.color), (xPos, self.yPos))

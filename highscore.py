@@ -1,3 +1,5 @@
+import cPickle
+
 class HighScore():
 	def __init__(self, score=0, name=""):
 		self.score = score
@@ -22,6 +24,12 @@ class HighScoreTable():
 		self.scores.sort()
 		if len(self.scores) > 10:
 			self.scores.pop()
+		
+		hsfile = open('highScores.dat', 'w')
+		pickler = cPickle.Pickler(hsfile)
+		table = self
+		cPickle.dump(table, hsfile)
+		
 	def __str__(self):
 		ret = ""
 		for i in self.scores:
