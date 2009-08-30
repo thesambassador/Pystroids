@@ -43,6 +43,12 @@ pygame.draw.line(livesImg, pygame.Color('white'), (21, 1), (32, 36), 2)
 pygame.draw.line(livesImg, pygame.Color('white'), (10, 30), (30, 30), 2)
 livesImg = pygame.transform.rotozoom(livesImg, 0, .75)
 
+stars = pygame.Surface((600,600), pygame.SRCALPHA)
+stars.fill((0,0,0,255))
+for i in range(0, 400):
+	col = random.randint(0,255)
+	stars.set_at((random.randint(0,screen.get_width()), random.randint(0, screen.get_height())), (col,col,col,255))
+
 #Generate a list of random asteroid images (so it doens't have to generate a new one every time)
 asteroidImgs = []
 for i in range(0,10):
@@ -70,8 +76,9 @@ while running:
 	
 	#Menu Scene
 	if scene == 0:
-	
-		screen.fill((0,0,0))
+		
+		screen.blit(stars, (0,0))
+		
 		objs.update(ticks, screen)
 		
 		#I don't know a better way to handle basic texts... this class kinda sucks. 
@@ -79,6 +86,7 @@ while running:
 		
 		texts.append(Text(screen, CENTER, (255,255,255,255), 50, "PYSTROIDS", .75*screen.get_height()/2))
 		texts.append(Text(screen, CENTER, (255,255,255,255), 20, "Press Space to Start", screen.get_height()/2))
+		texts.append(Text(screen, CENTER, (255,255,255,255), 15, "Press H to view High Scores", 1.75*screen.get_height()/2))
 	
 		
 		for t in texts:
@@ -92,7 +100,7 @@ while running:
 					objs = pygame.sprite.Group([])
 					font = pygame.font.Font(pygame.font.get_default_font(), 25)
 					points = 0
-					lives = 1
+					lives = 3
 					level = 1
 					extraLives = 1
 					scene = 1
@@ -106,6 +114,7 @@ while running:
 	#Game scene
 	elif scene == 1:
 		#Game Events
+		
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				running = 0
@@ -117,7 +126,7 @@ while running:
 			#next level
 			elif event.type == LEVELUP:
 				level += 1
-				for i in range(0, level+2):
+				for i in range(0, level+1):
 					objs.add(Asteroid(screen, asteroidImgs, 70, player, objs))
 			#points
 			elif event.type == POINTS:
@@ -128,7 +137,7 @@ while running:
 				lives -= 1
 				
 		#update objects
-		screen.fill((0,0,0))
+		screen.blit(stars, (0,0))
 		objs.update(ticks, screen)
 		player.update(ticks, screen, objs)
 		
@@ -167,7 +176,7 @@ while running:
 			pygame.event.post(pygame.event.Event(pygame.USEREVENT+1, {}))
 		
 		#signal extra life:
-		if points == 10000 * extraLives:
+		if points > 10000 * extraLives:
 			lives += 1
 			extraLives += 1
 		
@@ -179,7 +188,7 @@ while running:
 	
 	#Game Over scene
 	elif scene == 2:
-		screen.fill((0,0,0))
+		screen.blit(stars, (0,0))
 		objs.update(ticks, screen)
 		
 		#probably should write a class for this... Writes a few text lines to different places/sizes
@@ -209,7 +218,7 @@ while running:
 	
 	#High Scores scene
 	elif scene == 3:
-		screen.fill((0,0,0))
+		screen.blit(stars, (0,0))
 		objs.update(ticks, screen)
 		
 		#I don't know a better way to handle basic texts... this class kinda sucks. 
